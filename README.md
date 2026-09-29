@@ -1,196 +1,136 @@
-# Job Portfolio - MERN Stack Application
+# Job Portfolio Backend
 
-A full-stack job portal application built with MongoDB, Express.js, React.js, and Node.js. This application allows users to browse government and private job listings, apply for jobs with authentication, and build resumes.
+Backend API for Job Portfolio application with authentication and job application management.
 
 ## Features
 
-- 🔐 **User Authentication**: Secure signup/login with JWT tokens
-- 💼 **Job Listings**: Browse government and private sector jobs
-- 📝 **Job Applications**: Apply for jobs with cover letters and resume uploads
-- 🏢 **Company Directory**: Explore top companies
-- 📄 **Resume Builder**: Create professional resumes
-- 🔍 **Search & Filter**: Find jobs by category, location, and type
-
-## Tech Stack
-
-### Frontend
-- React.js
-- React Router
-- Axios for API calls
-- CSS3 for styling
-
-### Backend
-- Node.js
-- Express.js
-- MongoDB with Mongoose
-- JWT for authentication
-- bcrypt.js for password hashing
+- **User Authentication**: Signup, login with JWT tokens
+- **Protected Routes**: Middleware to protect sensitive endpoints
+- **Job Applications**: Submit and manage job applications (requires authentication)
+- **MongoDB Atlas**: Cloud database storage
 
 ## Installation
 
-### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB Atlas account or local MongoDB
-- npm or yarn
-
-### Backend Setup
-
-1. Navigate to backend directory:
-```bash
-cd jobportfolio-backend
-```
-
-2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Create `.env` file with:
-```
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
+## Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+MONGODB_URI=mongodb+srv://job:job@cluster0.bo8cfvl.mongodb.net/?appName=Cluster0
+JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 PORT=5000
+NODE_ENV=development
 ```
 
-4. Start the server:
+## Running the Server
+
 ```bash
+# Production
 npm start
+
+# Development with auto-reload
+npm run dev
 ```
 
-### Frontend Setup
-
-1. Navigate to frontend directory:
-```bash
-cd jobportfolio-frontend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm start
-```
-
-The application will open at `http://localhost:3000`
+Server will run on `http://localhost:5000`
 
 ## API Endpoints
 
-### Authentication
-- `POST /api/auth/signup` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/auth/me` - Get current user
+### Authentication Routes (`/api/auth`)
 
-### Job Applications
-- `POST /api/applications` - Submit job application (Protected)
-- `GET /api/applications` - Get all applications (Protected)
-- `GET /api/applications/my` - Get user's applications (Protected)
-
-## Project Structure
-
-```
-jobportfolio-mernstack/
-├── jobportfolio-backend/
-│   ├── config/
-│   │   └── db.js
-│   ├── controllers/
-│   │   ├── authController.js
-│   │   └── applicationController.js
-│   ├── middleware/
-│   │   └── authMiddleware.js
-│   ├── models/
-│   │   ├── User.js
-│   │   └── JobApplication.js
-│   ├── routes/
-│   │   ├── authRoutes.js
-│   │   └── applicationRoutes.js
-│   └── server.js
-└── jobportfolio-frontend/
-    ├── public/
-    ├── src/
-    │   ├── components/
-    │   │   ├── ApplicationForm.js
-    │   │   ├── JobCard.js
-    │   │   ├── JobDetails.js
-    │   │   └── Navbar.js
-    │   ├── pages/
-    │   │   ├── HomePage.js
-    │   │   ├── JobsPage.js
-    │   │   ├── AllJobsPage.js
-    │   │   ├── CompaniesPage.js
-    │   │   ├── ResumeBuilderPage.js
-    │   │   ├── LoginPage.js
-    │   │   └── SignupPage.js
-    │   ├── services/
-    │   │   └── api.js
-    │   └── App.js
-    └── package.json
+#### POST `/api/auth/signup`
+Register a new user
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "phone": "1234567890"
+}
 ```
 
-## Features in Detail
+#### POST `/api/auth/login`
+Login user
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
 
-### Authentication System
-- Secure user registration and login
-- JWT token-based authentication
-- Protected routes requiring login
-- Password hashing with bcrypt
+#### GET `/api/auth/me`
+Get current user profile (Protected)
+- Requires: Bearer token in Authorization header
 
-### Job Application System
-- Users must be logged in to apply
-- Form pre-fills with user details
-- Support for cover letters
-- Resume file upload
-- Application status tracking
+### Job Application Routes (`/api/applications`)
 
-### Job Categories
-- Government Jobs
-- Private Sector Jobs
-- Filter by location and job type
+All application routes require authentication.
+
+#### POST `/api/applications`
+Submit a job application
+```json
+{
+  "jobTitle": "Software Engineer",
+  "company": "Tech Corp",
+  "applicantName": "John Doe",
+  "email": "john@example.com",
+  "phone": "1234567890",
+  "coverLetter": "I am interested in this position...",
+  "resume": "resume.pdf"
+}
+```
+
+#### GET `/api/applications`
+Get user's applications (Protected)
+
+#### GET `/api/applications/all`
+Get all applications (Protected)
+
+#### PUT `/api/applications/:id`
+Update application status (Protected)
+```json
+{
+  "status": "reviewed"
+}
+```
 
 ## Database Schema
 
 ### User Model
-```javascript
-{
-  name: String,
-  email: String (unique),
-  password: String (hashed),
-  createdAt: Date
-}
-```
+- name (String, required)
+- email (String, required, unique)
+- password (String, required, hashed)
+- phone (String)
+- createdAt (Date)
 
-### JobApplication Model
-```javascript
-{
-  user: ObjectId (ref: User),
-  jobTitle: String,
-  company: String,
-  applicantName: String,
-  email: String,
-  phone: String,
-  coverLetter: String,
-  resume: String,
-  status: String (enum),
-  appliedAt: Date
-}
-```
+### Job Application Model
+- user (ObjectId, ref: User)
+- jobTitle (String, required)
+- company (String, required)
+- applicantName (String, required)
+- email (String, required)
+- phone (String, required)
+- coverLetter (String)
+- resume (String)
+- status (String: pending/reviewed/accepted/rejected)
+- appliedAt (Date)
 
-## Contributing
+## Technologies Used
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- Express.js
+- MongoDB with Mongoose
+- JWT for authentication
+- bcryptjs for password hashing
+- CORS for cross-origin requests
+- dotenv for environment variables
 
-## License
+## Security
 
-This project is open source and available under the MIT License.
-
-## Contact
-
-Krishna Veni - 231fa04835@gmail.com
-
-Project Link: [https://github.com/krishnavenikv7/jobportfolio-mernstack](https://github.com/krishnavenikv7/jobportfolio-mernstack)
+- Passwords are hashed using bcryptjs
+- JWT tokens expire in 30 days
+- Protected routes require valid JWT token
+- CORS enabled for frontend communication
